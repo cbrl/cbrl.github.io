@@ -1,10 +1,19 @@
 {
   "version": "2.0.0",
   "tasks": [
+	{
+		"label": "Install Dependencies",
+		"type": "shell",
+		"command": "eval \"$(rbenv init -)\" && bundle install",
+		"group": {
+			"kind": "build"
+		},
+		"detail": "Installs the required Ruby gems"
+	},
     {
       "label": "Run Jekyll Server",
       "type": "shell",
-      "command": "./tools/run.sh",
+      "command": "eval \"$(rbenv init -)\" && ./tools/run.sh",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -15,7 +24,7 @@
     {
       "label": "Build Jekyll Site",
       "type": "shell",
-      "command": "./tools/test.sh",
+      "command": "eval \"$(rbenv init -)\" && ./tools/test.sh",
       "group": {
         "kind": "build"
       },
