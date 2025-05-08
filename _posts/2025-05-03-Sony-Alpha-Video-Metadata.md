@@ -8,10 +8,20 @@ tags: [sony, sony alpha, camera, video, metadata]
 ## Overview
 
 Sony Alpha[^1] cameras embed detailed metadata in their video files. However, much of it is stored
-using non-standard methods that most tools and services fail to recognize. Outside the standard
-QuickTime tags, which contain minimal information, there are two primary sources of metadata:
+using non-standard methods that most tools and services fail to recognize.
 
 [^1]: This information may also apply to some models outside the Alpha series.
+
+As an example of where this fails, popular image services such as Google Photos or Immich will not
+read the GPS position from these videos, meaning they won't show up on the map view or in
+location-based searches.
+
+Additionally, transcoding tools may also drop the metadata entirely. On top of likely losing the
+GPS information, this usually also eliminates the metadata used in applications such as
+[Gyroflow](https://gyroflow.xyz/) (if your specific model of camera records motion data).
+
+Outside the standard QuickTime tags, which contain minimal information, there are two primary
+sources of metadata:
 
 1. **Embedded XML Document**: This resides in the root MP4 container and contains static metadata
 about the video and the camera. This information is also typically saved as a sidecar XML file
@@ -23,15 +33,6 @@ timestamped dynamic data points recorded during the video capture, such as:
 	- F-stop, exposure, and ISO settings
 	- GPS position (if available)
 	- Camera orientation and acceleration (certain models)
-
-As an example of where this fails, popular image services such as Google Photos or Immich will not
-read the GPS position from these videos, meaning they won't show up on a map view or location-based
-searches.
-
-Additionally, transcoding tools may also drop the metadata entirely. On top of likely losing the
-GPS information in the root XML document, this usually also eliminates the metadata stream, which
-can be very useful for applications such as [Gyroflow](https://gyroflow.xyz/) if your specific
-model of camera records motion data.
 
 ## Sample Video
 
@@ -103,7 +104,7 @@ Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'transcoded.MP4':
 ```
 
 If you attempt to force FFmpeg to copy the stream using `-map 0`, you will receive an error about
-an unknown format.
+an unknown codec.
 
 ```console
 user@machine:~$ ffmpeg -i C0140.MP4 -map 0 -c:v libx265 -b:v 20M -c:a copy transcoded.MP4
@@ -115,7 +116,7 @@ Error while filtering: Invalid argument
 ```
 
 Using a tool like [MP4Box](https://wiki.gpac.io/MP4Box/MP4Box/), which operates at a lower level on
-the MP4 container, we can copy the a meta box or data stream from the original file without knowing
+the MP4 container, we can copy the meta box or data stream from the original file without knowing
 the actual format of the data.
 
 ```bash
@@ -133,7 +134,7 @@ Because the GPS position is not written to standard QuickTime tags, image storag
 Google Photos or Immich will not recognize it.
 
 [ExifTool](https://exiftool.org/) is capable of reading many proprietary formats, including those
-found in video from Sony cameras. Using the `-ee`/`-extractEmbedded` flag, it will extract the GPS
+found in videos from Sony cameras. Using the `-ee`/`-extractEmbedded` flag, it will extract the GPS
 position from the embedded metadata, which will be exposed through the composite `GPSLatitude`,
 `GPSLongitude`, and `GPSPosition` tags.
 
@@ -164,7 +165,8 @@ exiftool -extractEmbedded --duplicates '-GPSLatitude<$GPSLatitude' '-GPSLongitud
 ## Utility Scripts
 
 [This repository](https://github.com/cbrl/sony-alpha-video-scripts) contains a set of scripts that
-can be used to work with videos from Sony cameras.
+can be used to work with videos from Sony cameras. Most of them are simply wrappers around the
+commands described above.
 
 > These scripts require FFmpeg, MP4Box, and ExifTool to be installed.
 {: .prompt-info }
