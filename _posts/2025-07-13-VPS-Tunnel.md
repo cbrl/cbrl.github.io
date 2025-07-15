@@ -8,17 +8,24 @@ tags: [vps, wireguard, nginx, tunnel, reverse proxy]
 ## Overview
 
 Many people who self-host services may want to expose them to the internet, but also might have
-issues with NAT or prefer to avoid exposing their server's IP and opening ports on their firewall.
+issues with NAT, or prefer to avoid exposing their server's IP and opening ports on their firewall.
 
 [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
-is one solution that most people in this situation will likely come across. It's easy to set up and
-works very well, but there are some drawbacks. Cloudflare imposes a fairly restrictive
+is one solution that you'll almost certainly come across in this situation. It's easy to set up and
+works very well, but it does have some drawbacks. Cloudflare imposes a fairly restrictive
 [upload limit](https://developers.cloudflare.com/cache/concepts/default-cache-behavior/#upload-limits),
-and many who are self-hosting their services might not want to insert an SSL-terminating third party
-into their stack.
+and if you're self-hosting your services there's a good chance you might not prefer to insert an
+SSL-terminating third party into your stack. It also only supports HTTP traffic, so you're out of
+luck if you want to proxy a service that doesn't work over HTTP.
 
 The common alternative, and the focus of this post, is to run a similar tunneling setup through your
 own VPS.
+
+In my case, I have a set of services with a reverse proxy and authentication configured on my home
+network, and want a simple tunnel that I can point my domain to and have all traffic forwarded to
+the home network.
+
+![VPS Tunnel Concept](/assets/posts/2025-07-13-VPS-Tunnel/VPSTunnelConcept.drawio.svg)
 
 ## VPN Tunnel Solutions
 
@@ -33,11 +40,8 @@ such as:
 Pangolin is a good all-in-one solution, integrating the VPN tunnel and reverse proxy into a single
 product with a fancy UI. However, a lot of its functionality is unnecessary if you already have
 reverse proxy and authentication solutions configured, or just prefer to manage them separately.
-
-In my case, I have a set of services with a reverse proxy and authentication configured on my local
-network, and simply need a VPS that I can point my domain to, which would tunnel all traffic to
-the reverse proxy. Even for the more narrowly focused VPN tunnels listed above, a lot of their
-complexity isn't required for a simple point-to-point connection like this.
+Even for the more narrowly focused VPN tunnels listed above, a lot of their complexity isn't
+required for a simple point-to-point connection.
 
 For scenarios like this it's actually extremely easy to manually configure a tunnel, so much so
 that there isn't much motivation to opt for higher level abstractions like Tailscale or Pangolin.
