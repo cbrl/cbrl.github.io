@@ -182,10 +182,11 @@ node is maintained.
 ### Nginx
 
 Now that we have a VPN connection between the two devices, we need to forward traffic from the VPS
-to the home server. You might initially think of a low-level forwarding of all traffic through the
-wireguard interface via something like iptables. However, if you have any SSL-secured services
-(which you should in nearly all cases), then you will need something aware of the protocol in order
-to avoid certificate errors.
+to the home server. You might initially think of piping all traffic through the wireguard
+interface, which could be done at a low level using something like iptables. This approach would
+work for some cases, but would require overwriting the request's source address with that of the
+VPS. Losing the ability to distinguish clients on the other end is not ideal, especially if you
+want to run software like Crowdsec or fail2ban.
 
 Nginx is one of several popular open source reverse proxy options that we can use to fix this
 issue. Using the [PROXY Protocol](https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt),
