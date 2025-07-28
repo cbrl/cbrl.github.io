@@ -182,16 +182,24 @@ node is maintained.
 ### Nginx
 
 Now that we have a VPN connection between the two devices, we need to forward traffic from the VPS
-to the home server. You might initially think of piping all traffic through the wireguard
-interface, which could be done at a low level using something like iptables. This approach would
-work for some cases, but would require overwriting the request's source address with that of the
-VPS. Losing the ability to distinguish clients on the other end is not ideal, especially if you
-want to run software like Crowdsec or fail2ban.
+to the home server.
+
+If you have some familiarity with networking, you might initially think of piping all traffic
+through the wireguard interface using something like iptables. There are many tutorials out there
+which describe this approach. However, this doesn't work well in all cases, and can be quite
+difficult or tedious to debug given the lack of easily visible diagnostics. The primary issue with
+this method is that it involves overwriting the source request's address with that of the VPS.
+Losing the ability to distinguish clients on the other end end is not ideal, especially if you want
+to run software like Crowdsec or fail2ban. Assuming your services are using HTTPS (as they always
+should be), that software also wouldn't work on the VPS since you would just be passing encrypted
+traffic that can't be inspected.
 
 Nginx is one of several popular open source reverse proxy options that we can use to fix this
 issue. Using the [PROXY Protocol](https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt),
 reverse proxies can transmit additional information that preserves the originating client's
-address instead of overwriting it with that of the VPS.
+address instead of overwriting it with that of the VPS. The caveat is that the receiving end needs
+to know that this protocol is being used. Pretty much any notable reverse proxy supports this
+though.
 
 As a bonus, Nginx will also allow us to forward UDP traffic if we desire (e.g. for a game server),
 so this single solution will work for nearly any service running behind the tunnel.
